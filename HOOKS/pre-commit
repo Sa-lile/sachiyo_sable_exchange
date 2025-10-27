@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+
+HOOK_ERROR=false
+
+# Vérification des console.log / warn / table   
+# -R: récursif, -I: ignore les fichiers binaires, -n: affiche le numéro de ligne
+if grep -RIn --exclude-dir={node_modules,.git} --include="*.js" -E "console\.(log|warn|table)" .; then
+  echo "Il reste des console.log / warn / table dans le code."
+  HOOK_ERROR=true
+fi
+
+# Mise en évidence des TODO
+if grep -RIn --exclude-dir={node_modules,.git} -E "//\s*TODO" .; then
+  echo "Des TODO sont encore présents dans le code (voir ci-dessus)."
+fi
+
+# Arrêt du commit si erreur
+if [ "$HOOK_ERROR" = true ]; then
+  echo ""
+  echo "Commit annulé : retirez les console.log / warn / table avant de valider."
+  exit 1
+fi
+
+echo " Vérification terminée, aucun problème détecté."
+exit 0
